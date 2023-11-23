@@ -15,13 +15,17 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author WINDOWS 11
  */
+
 public class Admin extends javax.swing.JFrame {
+        private DefaultTableModel tableModel;
 Map<String, Double> roomTypeCostMap = new HashMap<>();
     /**
      * Creates new form Admin
      */
     public Admin() {
         initComponents();
+         tableModel = new DefaultTableModel(new Object[]{"Nama", "ID", "Alamat", "Room Type", "Email", "Check In", "Check Out"}, 0);
+        namat.setModel(tableModel);
         
         
     }
@@ -354,6 +358,8 @@ String emValue = em.getText();
 String almValue = alm.getText();
 String inGetext = in.getText();  // Assuming alm1 is the check-in date field
 String outGetext = out.getText(); // Assuming alm2 is the check-out date field
+ String selectedRoomTypeName = (String) rt.getSelectedItem();
+            String selectedRoomType = getRoomType(selectedRoomTypeName);
 
 try {
     // Database-related code
@@ -370,8 +376,7 @@ try {
 
             // Execute the insert query for CUSTOMER table
             insertCustomerStatement.executeUpdate();
-            String selectedRoomTypeName = (String) rt.getSelectedItem();
-            String selectedRoomType = getRoomType(selectedRoomTypeName);
+           
              Double roomCost = roomTypeCostMap.getOrDefault(selectedRoomType, 0.0);
             // Get the generated primary key (id_guest)
             try (ResultSet generatedKeys = insertCustomerStatement.getGeneratedKeys()) {
@@ -405,6 +410,61 @@ try {
     e.printStackTrace();
     // Handle the exception appropriately (show a message, log, etc.)
 }
+ // Your existing code for inserting into the database
+
+        // After successfully inserting into the database, add a row to the table
+        addRowToTable(namaValue, idValue, almValue,selectedRoomType , emValue, inGetext, outGetext);
+    }
+
+    private void addRowToTable(String nama, String id, String alm, String roomType, String email, String checkIn, String checkOut) {
+        Object[] rowData = {nama, id, alm, roomType, email, checkIn, checkOut};
+        tableModel.addRow(rowData);
+    }
+
+    // Modify the keyReleased event for each input field to update the table model
+    private void namaKeyReleased(java.awt.event.KeyEvent evt) {                                     
+        addDataToTable();
+    }                                    
+
+    private void idKeyReleased(java.awt.event.KeyEvent evt) {                                   
+        addDataToTable();
+    }                                  
+
+    private void noKeyReleased(java.awt.event.KeyEvent evt) {                                   
+        addDataToTable();
+    }                                  
+
+    private void emKeyReleased(java.awt.event.KeyEvent evt) {                                   
+        addDataToTable();
+    }                                  
+
+    private void almKeyReleased(java.awt.event.KeyEvent evt) {                                    
+        addDataToTable();
+    }                                   
+
+    private void inKeyReleased(java.awt.event.KeyEvent evt) {                                   
+        addDataToTable();
+    }                                  
+
+    private void outKeyReleased(java.awt.event.KeyEvent evt) {                                    
+        addDataToTable();
+    }
+
+    // Method to update the table model when any of the input fields change
+    private void addDataToTable() {
+        String namaValue = nama.getText();
+        String idValue = id.getText();
+        String noValue = no.getText();
+        String emValue = em.getText();
+        String almValue = alm.getText();
+        String inValue = in.getText();
+        String outValue = out.getText();
+
+       
+
+        // Add a new row with the current input values
+        addRowToTable(namaValue, idValue, noValue, emValue, almValue, inValue, outValue);
+    
 
  updateTable();
 
@@ -427,7 +487,7 @@ try {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         Object[] rowData = {
-                            resultSet.getString("name"),
+                            resultSet.getString("nama"),
                             resultSet.getString("id_guest"),
                             resultSet.getString("address"),
                             resultSet.getString("room_type"),
@@ -443,6 +503,7 @@ try {
             e.printStackTrace();
             // Handle the exception appropriately (show a message, log, etc.)
         }
+        
     }
     private void outActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_outActionPerformed
         // TODO add your handling code here:

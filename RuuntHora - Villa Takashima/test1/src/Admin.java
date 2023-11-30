@@ -9,6 +9,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.JOptionPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -23,11 +26,21 @@ Map<String, Double> roomTypeCostMap = new HashMap<>();
      * Creates new form Admin
      */
     public Admin() {
-        initComponents();
-         tableModel = new DefaultTableModel(new Object[]{"Nama", "ID", "Alamat", "Room Type", "Email", "Check In", "Check Out"}, 0);
+         initComponents();
+        tableModel = new DefaultTableModel(new Object[]{"Nama", "ID", "Alamat", "Room Type", "Email", "Check In", "Check Out"}, 0);
         namat.setModel(tableModel);
-        
-        
+
+        // Call updateTable to fetch and display existing records
+        updateTable();
+
+        // Add a listener to handle row selection in the table
+        namat.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                // Call a method to handle row selection
+                handleRowSelection();
+            }
+        });
     }
 
     /**
@@ -53,11 +66,15 @@ Map<String, Double> roomTypeCostMap = new HashMap<>();
         em = new javax.swing.JTextField();
         alm = new javax.swing.JTextField();
         cI = new javax.swing.JToggleButton();
-        jToggleButton1 = new javax.swing.JToggleButton();
+        search = new javax.swing.JToggleButton();
         jLabel7 = new javax.swing.JLabel();
         in = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         out = new javax.swing.JTextField();
+        del = new javax.swing.JButton();
+        updt = new javax.swing.JToggleButton();
+        jButton1 = new javax.swing.JButton();
+        clear = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         namat = new javax.swing.JTable();
 
@@ -117,17 +134,17 @@ Map<String, Double> roomTypeCostMap = new HashMap<>();
         });
 
         cI.setBackground(new java.awt.Color(204, 255, 204));
-        cI.setText("Check In");
+        cI.setText("Add");
         cI.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cIActionPerformed(evt);
             }
         });
 
-        jToggleButton1.setText("Search");
-        jToggleButton1.addActionListener(new java.awt.event.ActionListener() {
+        search.setText("Search");
+        search.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jToggleButton1ActionPerformed(evt);
+                searchActionPerformed(evt);
             }
         });
 
@@ -144,6 +161,36 @@ Map<String, Double> roomTypeCostMap = new HashMap<>();
         out.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 outActionPerformed(evt);
+            }
+        });
+
+        del.setBackground(new java.awt.Color(255, 204, 204));
+        del.setText("Delete");
+        del.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                delActionPerformed(evt);
+            }
+        });
+
+        updt.setText("Update");
+        updt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                updtActionPerformed(evt);
+            }
+        });
+
+        jButton1.setBackground(new java.awt.Color(255, 51, 51));
+        jButton1.setText("Log out");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        clear.setText("Clear");
+        clear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearActionPerformed(evt);
             }
         });
 
@@ -186,7 +233,9 @@ Map<String, Double> roomTypeCostMap = new HashMap<>();
                                     .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(out, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addComponent(clear, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(out, javax.swing.GroupLayout.DEFAULT_SIZE, 232, Short.MAX_VALUE))))))
                         .addGap(56, 56, 56))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -194,11 +243,19 @@ Map<String, Double> roomTypeCostMap = new HashMap<>();
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(11, 11, 11)
                                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(70, 70, 70))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jToggleButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 338, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(cI, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(search, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(updt, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(cI, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(del, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(0, 0, Short.MAX_VALUE))))
         );
         jPanel1Layout.setVerticalGroup(
@@ -234,13 +291,21 @@ Map<String, Double> roomTypeCostMap = new HashMap<>();
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(out, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel8))
-                .addGap(35, 35, 35)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(clear)
+                .addGap(12, 12, 12)
                 .addComponent(rt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(search, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(updt, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addComponent(jToggleButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(cI, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cI, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(del, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addContainerGap())
         );
 
         namat.setModel(new javax.swing.table.DefaultTableModel(
@@ -272,7 +337,7 @@ Map<String, Double> roomTypeCostMap = new HashMap<>();
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 592, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 619, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -280,7 +345,7 @@ Map<String, Double> roomTypeCostMap = new HashMap<>();
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 565, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -470,44 +535,246 @@ try {
 
     }//GEN-LAST:event_cIActionPerformed
 
-    private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
+    private void searchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jToggleButton1ActionPerformed
+         performSearch();
+    }//GEN-LAST:event_searchActionPerformed
 
     private void inActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_inActionPerformed
     private void updateTable() {
         DefaultTableModel model = (DefaultTableModel) namat.getModel();
-  
+   
 
+    try (Connection connection = DriverManager.getConnection("jdbc:sqlserver://localhost;encrypt=true;trustServerCertificate=true;databaseName=RuuntHora", "sa", "12345678")) {
+        String query = "SELECT CUSTOMER.name, CUSTOMER.id_guest, CUSTOMER.address, ORDERS.room_type, CUSTOMER.email, ORDERS.check_in, ORDERS.check_out FROM CUSTOMER JOIN ORDERS ON CUSTOMER.id_guest = ORDERS.id_guest";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Object[] rowData = {
+                        resultSet.getString("name"),
+                        resultSet.getString("id_guest"),
+                        resultSet.getString("address"),
+                        resultSet.getString("room_type"),
+                        resultSet.getString("email"),
+                        resultSet.getString("check_in"),
+                        resultSet.getString("check_out")
+                    };
+                    model.addRow(rowData);
+                }
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+        // Handle the exception appropriately (show a message, log, etc.)
+    }
+        
+    }
+    private void outActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_outActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_outActionPerformed
+
+    private void delActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_delActionPerformed
+        // TODO add your handling code here:
+        // Get the selected row index
+        int selectedRowIndex = namat.getSelectedRow();
+
+        if (selectedRowIndex != -1) { // Check if a row is selected
+            // Get the values from the selected row
+            String idGuest = namat.getValueAt(selectedRowIndex, 1).toString(); // Assuming ID is at column index 1
+
+            // Call a method to delete the row from the database
+            deleteRowFromDatabase(idGuest);
+
+            // Remove the selected row from the table
+            tableModel.removeRow(selectedRowIndex);
+        } else {
+            // Show a message to inform the user to select a row
+            JOptionPane.showMessageDialog(this, "Please select a row to delete.", "No Row Selected", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_delActionPerformed
+
+    private void updtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updtActionPerformed
+        // TODO add your handling code here:
+        // Get the selected row index
+        int selectedRowIndex = namat.getSelectedRow();
+
+        if (selectedRowIndex != -1) { // Check if a row is selected
+            // Get the values from the text fields
+            String updatedNamaValue = nama.getText();
+            String updatedIdValue = id.getText();
+            String updatedAlmValue = alm.getText();
+            String updatedRoomTypeValue = (String) rt.getSelectedItem();
+            String updatedEmailValue = em.getText();
+            String updatedCheckInValue = in.getText();
+            String updatedCheckOutValue = out.getText();
+
+            // Update the values in the table model
+            namat.setValueAt(updatedNamaValue, selectedRowIndex, 0);
+            namat.setValueAt(updatedIdValue, selectedRowIndex, 1);
+            namat.setValueAt(updatedAlmValue, selectedRowIndex, 2);
+            namat.setValueAt(updatedRoomTypeValue, selectedRowIndex, 3);
+            namat.setValueAt(updatedEmailValue, selectedRowIndex, 4);
+            namat.setValueAt(updatedCheckInValue, selectedRowIndex, 5);
+            namat.setValueAt(updatedCheckOutValue, selectedRowIndex, 6);
+
+            // Call a method to update the corresponding records in the database
+            updateDatabaseRecord(updatedNamaValue, updatedIdValue, updatedAlmValue, updatedRoomTypeValue, updatedEmailValue, updatedCheckInValue, updatedCheckOutValue);
+
+            // Clear the text fields after updating
+            clearTextFields();
+        } else {
+            // Show a message to inform the user to select a row
+            JOptionPane.showMessageDialog(this, "Please select a row to update.", "No Row Selected", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_updtActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        int option = JOptionPane.showConfirmDialog(this, "Are you sure you want to logout?", "Logout", JOptionPane.YES_NO_OPTION);
+        if (option == JOptionPane.YES_OPTION) {
+            // Close the admin page
+            this.dispose();
+
+            // Open the login page
+            Login loginPage = new Login();
+            loginPage.setVisible(true);
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void clearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearActionPerformed
+        // TODO add your handling code here:
+        nama.setText("");
+        id.setText("");
+        no.setText("");
+        alm.setText("");
+        em.setText("");
+        in.setText("");
+        out.setText("");
+        rt.setSelectedIndex(0);
+    }//GEN-LAST:event_clearActionPerformed
+     private void deleteRowFromDatabase(String idGuest) {
         try (Connection connection = DriverManager.getConnection("jdbc:sqlserver://localhost;encrypt=true;trustServerCertificate=true;databaseName=RuuntHora", "sa", "12345678")) {
-            String query = "SELECT name, id_guest, address, room_type, email, check_in, check_out FROM CUSTOMER JOIN ORDERS ON CUSTOMER.id_guest = ORDERS.id_guest";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    while (resultSet.next()) {
-                        Object[] rowData = {
-                            resultSet.getString("nama"),
+            // Delete the corresponding records from CUSTOMER and ORDERS tables based on id_guest
+            String deleteCustomerQuery = "DELETE FROM CUSTOMER WHERE id_guest = ?";
+            try (PreparedStatement deleteCustomerStatement = connection.prepareStatement(deleteCustomerQuery)) {
+                deleteCustomerStatement.setString(1, idGuest);
+                deleteCustomerStatement.executeUpdate();
+            }
+
+            String deleteOrdersQuery = "DELETE FROM ORDERS WHERE id_guest = ?";
+            try (PreparedStatement deleteOrdersStatement = connection.prepareStatement(deleteOrdersQuery)) {
+                deleteOrdersStatement.setString(1, idGuest);
+                deleteOrdersStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Handle the exception appropriately (show a message, log, etc.)
+        }
+    }
+    private void performSearch() {
+    // Get the search criteria from the text field (e.g., name)
+    String searchCriteriaName = nama.getText();
+
+    // Get the selected room type from the dropdown
+    String searchCriteriaRoomType = (String) rt.getSelectedItem();
+
+    // Clear the existing rows in the table
+    tableModel.setRowCount(0);
+
+    try (Connection connection = DriverManager.getConnection("jdbc:sqlserver://localhost;encrypt=true;trustServerCertificate=true;databaseName=RuuntHora", "sa", "12345678")) {
+        // Create a search query based on the criteria
+        String searchQuery = "SELECT CUSTOMER.name, CUSTOMER.id_guest, CUSTOMER.address, ORDERS.room_type, CUSTOMER.email, ORDERS.check_in, ORDERS.check_out " +
+                "FROM CUSTOMER JOIN ORDERS ON CUSTOMER.id_guest = ORDERS.id_guest " +
+                "WHERE CUSTOMER.name LIKE ? AND ORDERS.room_type = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(searchQuery)) {
+            preparedStatement.setString(1, "%" + searchCriteriaName + "%"); // Use LIKE for partial matching
+            preparedStatement.setString(2, searchCriteriaRoomType);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Object[] rowData = {
+                            resultSet.getString("name"),
                             resultSet.getString("id_guest"),
                             resultSet.getString("address"),
                             resultSet.getString("room_type"),
                             resultSet.getString("email"),
                             resultSet.getString("check_in"),
                             resultSet.getString("check_out")
-                        };
-                        model.addRow(rowData);
-                    }
+                    };
+                    tableModel.addRow(rowData);
                 }
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+        // Handle the exception appropriately (show a message, log, etc.)
+    }
+}
+private void handleRowSelection() {
+        // Get the selected row index
+        int selectedRowIndex = namat.getSelectedRow();
+
+        if (selectedRowIndex != -1) { // Check if a row is selected
+            // Get the values from the selected row
+            String namaValue = namat.getValueAt(selectedRowIndex, 0).toString(); // Assuming Nama is at column index 0
+            String idValue = namat.getValueAt(selectedRowIndex, 1).toString();
+            String almValue = namat.getValueAt(selectedRowIndex, 2).toString();
+            String roomTypeValue = namat.getValueAt(selectedRowIndex, 3).toString();
+            String emailValue = namat.getValueAt(selectedRowIndex, 4).toString();
+            String checkInValue = namat.getValueAt(selectedRowIndex, 5).toString();
+            String checkOutValue = namat.getValueAt(selectedRowIndex, 6).toString();
+
+            // Set the values to the respective text fields
+            nama.setText(namaValue);
+            id.setText(idValue);
+            alm.setText(almValue);
+            // Set the selected room type in the dropdown
+            rt.setSelectedItem(roomTypeValue);
+            em.setText(emailValue);
+            in.setText(checkInValue);
+            out.setText(checkOutValue);
+        }
+    }
+private void updateDatabaseRecord(String updatedNama, String updatedId, String updatedAlm, String updatedRoomType, String updatedEmail, String updatedCheckIn, String updatedCheckOut) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlserver://localhost;encrypt=true;trustServerCertificate=true;databaseName=RuuntHora", "sa", "12345678")) {
+            // Update the corresponding records in CUSTOMER and ORDERS tables based on id_guest
+            String updateCustomerQuery = "UPDATE CUSTOMER SET name = ?, address = ?, email = ? WHERE id_guest = ?";
+            try (PreparedStatement updateCustomerStatement = connection.prepareStatement(updateCustomerQuery)) {
+                updateCustomerStatement.setString(1, updatedNama);
+                updateCustomerStatement.setString(2, updatedAlm);
+                updateCustomerStatement.setString(3, updatedEmail);
+                updateCustomerStatement.setString(4, updatedId);
+                updateCustomerStatement.executeUpdate();
+            }
+
+            String updateOrdersQuery = "UPDATE ORDERS SET room_type = ?, check_in = ?, check_out = ? WHERE id_guest = ?";
+            try (PreparedStatement updateOrdersStatement = connection.prepareStatement(updateOrdersQuery)) {
+                updateOrdersStatement.setString(1, updatedRoomType);
+                updateOrdersStatement.setString(2, updatedCheckIn);
+                updateOrdersStatement.setString(3, updatedCheckOut);
+                updateOrdersStatement.setString(4, updatedId);
+                updateOrdersStatement.executeUpdate();
             }
         } catch (SQLException e) {
             e.printStackTrace();
             // Handle the exception appropriately (show a message, log, etc.)
         }
-        
     }
-    private void outActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_outActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_outActionPerformed
+
+    private void clearTextFields() {
+        // Clear the text fields
+        nama.setText("");
+        id.setText("");
+        alm.setText("");
+        rt.setSelectedIndex(0); // Set the dropdown to the default option
+        em.setText("");
+        in.setText("");
+        out.setText("");
+    }
+
 
     /**
      * @param args the command line arguments
@@ -556,9 +823,12 @@ try {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField alm;
     private javax.swing.JToggleButton cI;
+    private javax.swing.JButton clear;
+    private javax.swing.JButton del;
     private javax.swing.JTextField em;
     private javax.swing.JTextField id;
     private javax.swing.JTextField in;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -569,11 +839,12 @@ try {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JToggleButton jToggleButton1;
     private javax.swing.JTextField nama;
     private javax.swing.JTable namat;
     private javax.swing.JTextField no;
     private javax.swing.JTextField out;
     private javax.swing.JComboBox<String> rt;
+    private javax.swing.JToggleButton search;
+    private javax.swing.JToggleButton updt;
     // End of variables declaration//GEN-END:variables
 }
